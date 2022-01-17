@@ -20,7 +20,7 @@ from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
 
 # read in data
-data = pd.read_csv('star_classification.csv')
+data = pd.read_csv(r"star_classification.csv")
 
 # split data into training and testing sets
 X = data.drop('class', axis=1)
@@ -34,8 +34,9 @@ X_train = scaler.transform(X_train)
 X_test = scaler.transform(X_test)
 
 # create dictionary of models
-models = {'KNN': KNeighborsClassifier(),
-          'Naive Bayes': GaussianNB(),
+models = {'Naive Bayes': GaussianNB(), 
+          'SVM': SVC(),
+          'KNN': KNeighborsClassifier(),
           'SVM': SVC(),
           'Decision Tree': DecisionTreeClassifier(),
           'Random Forest': RandomForestClassifier(),
@@ -47,6 +48,20 @@ models = {'KNN': KNeighborsClassifier(),
           'MLP': MLPClassifier()}
 
 # create dictionary of models with parameters to tune
+params = {'KNN': {},
+          'Naive Bayes': {},
+          'SVM': {},
+          'Decision Tree': {},
+          'Random Forest': {},
+          'AdaBoost': {},
+          'Gradient Boosting': {},
+          'Bagging': {},
+          'Logistic Regression': {},
+          'SGD': {},
+          'MLP': {}}
+
+'''
+Options for parameter optimization. Can select which models you want to try optimizing and some examples of parameters to optimize for each model.
 params = {'KNN': {'n_neighbors': [1, 3, 5, 7, 9, 11, 13, 15]},
           'Naive Bayes': {},
           'SVM': {'C': [0.1, 1, 10, 100, 1000], 'gamma': [1, 0.1, 0.01, 0.001, 0.0001]},
@@ -58,6 +73,8 @@ params = {'KNN': {'n_neighbors': [1, 3, 5, 7, 9, 11, 13, 15]},
           'Logistic Regression': {'C': [0.1, 1, 10, 100, 1000]},
           'SGD': {'loss': ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'], 'penalty': ['l1', 'l2', 'elasticnet']},
           'MLP': {'hidden_layer_sizes': [10, 50, 100], 'activation': ['identity', 'logistic', 'tanh', 'relu']}}
+'''
+
 
 # create dictionary of tuned models
 tuned_models = {}
@@ -65,7 +82,7 @@ tuned_models = {}
 # loop through models
 for model in models:
     # tune model
-    clf = GridSearchCV(models[model], params[model], cv=10)
+    clf = GridSearchCV(models[model], params[model], cv=5, verbose=3)
     # fit model
     clf.fit(X_train, y_train)
     # save model
@@ -75,6 +92,9 @@ for model in models:
     print('Best Score: ' + str(clf.best_score_))
     print('Best Parameters: ' + str(clf.best_params_))
     print('\n')
+
+
+import seaborn as sns
 
 # create dictionary of predictions
 predictions = {}
@@ -111,5 +131,7 @@ sns.barplot(x='model', y='score', data=scores)
 plt.show()
 
 # plot confusion matrix heatmap
-sns.heatmap(confusion['confusion_matrix'][0], annot=True, cmap='Blues')
-plt.show()
+for index in confusion.index:
+    print(f' Heatmap for {confusion.iloc[index, 0]}')
+    sns.heatmap(confusion.iloc[index, 1], annot=True, cmap='Blues')
+    plt.show()
